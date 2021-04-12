@@ -84,7 +84,6 @@ bot.on('inline_query', async (ctx) => {
         if (q === 'video2') {
             results.splice(0, 50)
         }
-        results.slice(0, 50).map(r => console.log(`http://nicolatoscan.altervista.org/borismp4/${r}.jpg`))
         ctx.answerInlineQuery(results.slice(0, 50).map(r => ({
             type: 'video',
             mime_type: 'video/mp4',
