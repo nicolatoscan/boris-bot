@@ -21,6 +21,7 @@ const bot: Telegraf<Context> = new Telegraf(BOT_TOKEN)
 bot.command('ping', ctx => ctx.reply('Pong'));
 
 bot.on('text', async ctx => {
+    console.log(`Chat search: ${ctx.message.text}`);
     const { results, keys } = getImagesPath(ctx.message.text.toLowerCase());
 
     if (results.length === 0) {
@@ -49,12 +50,11 @@ bot.on('text', async ctx => {
 });
 
 bot.on('inline_query', (ctx) => {
-    console.log(ctx.inlineQuery.query);
-    
+    console.log(`Inline search: ${ctx.inlineQuery.query}`);
     const { results, keys } = getImagesPath(ctx.inlineQuery.query.toLowerCase());
+    
 
-
-    ctx.answerInlineQuery(results.map((r, i) => ({
+    ctx.answerInlineQuery(results.slice(0, 50).map((r, i) => ({
         type: 'photo',
         id: i.toString(),
         thumb_url: `http://nicolatoscan.altervista.org/boris/${r}`,
