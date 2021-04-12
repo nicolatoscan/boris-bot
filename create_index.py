@@ -10,12 +10,15 @@ def tokenize(text: str):
         yield match.group(0)
 
 path = Path(sys.argv[1])
-p = Path(path).glob('*.txt')
-files = [x for x in p if x.is_file()]
-wordDic = { 'empty-words': [] }
+txtFiles = [x for x in Path(path).glob('txt/*.txt') if x.is_file()]
+mp4Files = [ntpath.basename(x) for x in Path(path).glob('mp4/*.mp4') if x.is_file()]
+wordDic = {
+    'empty-words': [],
+    'videos': mp4Files
+}
 ii = 0
 with open('index.tsv', 'w') as outputFile:
-    for f in tqdm(files):
+    for f in tqdm(txtFiles):
         basename = ntpath.basename(f).strip(".txt")
 
         with open(f) as file:

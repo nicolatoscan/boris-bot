@@ -25,6 +25,10 @@ function getImagesPath(query: string): { results: string[], keys: string[] } {
     return { results: results, keys: keys };
 }
 
+function getVideos(): { results: string[], keys: string[] } {
+    return { results: [...imageIndex['videos']], keys: ['videos'] };
+}
+
 const imageIndex = JSON.parse(fs.readFileSync('../index.json', 'utf-8'))
 const BOT_TOKEN = process.env.BOT_TOKEN ?? ''
 const bot: Telegraf<Context> = new Telegraf(BOT_TOKEN)
@@ -64,19 +68,34 @@ bot.on('inline_query', async (ctx) => {
     const q = ctx.inlineQuery.query.toLowerCase()
     console.log(`Inline search: ${q}`);
     
-    const { results, keys } = getImagesPath(q.length >= 3 ? q : '');
-    if (q.length < 3) {
-        results.splice(0, 50 * q.length)
+    const { results, keys } =  (q === 'video' || q === 'video2') ? getVideos() : getImagesPath(q.length >= 3 ? q : '');
+    
+    if (q !== 'video' && q !== 'video2') {
+        if (q.length < 3) {
+            results.splice(0, 50 * q.length)
+        }
+        await ctx.answerInlineQuery(results.slice(0, 50).map(r => ({
+                type: 'photo',
+                id: r,
+                thumb_url: `http://nicolatoscan.altervista.org/boris/${r}`,
+                photo_url: `http://nicolatoscan.altervista.org/boris/${r}`
+            })))
+    } else {
+        if (q === 'video2') {
+            results.splice(0, 50)
+        }
+        results.slice(0, 50).map(r => console.log(`http://nicolatoscan.altervista.org/borismp4/${r}.jpg`))
+        ctx.answerInlineQuery(results.slice(0, 50).map(r => ({
+            type: 'video',
+            mime_type: 'video/mp4',
+            id: r,
+            thumb_url: `http://nicolatoscan.altervista.org/borismp4/${r}.jpg`,
+            title: r,
+            video_url: `http://nicolatoscan.altervista.org/borismp4/${r}`
+        })));
     }
-    
-    
-    await ctx.answerInlineQuery(results.slice(0, 50).map((r, i) => ({
-        type: 'photo',
-        id: i.toString(),
-        thumb_url: `http://nicolatoscan.altervista.org/boris/${r}`,
-        photo_url: `http://nicolatoscan.altervista.org/boris/${r}`
-    })))
 })
+
 
 bot.launch()
 console.log(`Bot started`);
