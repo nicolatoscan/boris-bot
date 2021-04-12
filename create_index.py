@@ -12,8 +12,8 @@ def tokenize(text: str):
 path = Path(sys.argv[1])
 p = Path(path).glob('*.txt')
 files = [x for x in p if x.is_file()]
-wordDic = {}
-
+wordDic = { 'empty-words': [] }
+ii = 0
 with open('index.tsv', 'w') as outputFile:
     for f in tqdm(files):
         basename = ntpath.basename(f).strip(".txt")
@@ -21,11 +21,14 @@ with open('index.tsv', 'w') as outputFile:
         with open(f) as file:
             lines = [l.strip('\n') for l in file]
         words = list(map(lambda w: w.lower(), tokenize(' '.join(lines))))
-        for w in words:
-            if w in wordDic:
-                wordDic[w].append(basename)
-            else:
-                wordDic[w] = [basename]
+        if len(words) == 0:
+            wordDic['empty-words'].append(basename)
+        else:
+            for w in words:
+                if w in wordDic:
+                    wordDic[w].append(basename)
+                else:
+                    wordDic[w] = [basename]
 
         res = ' '.join(words)
         outputFile.write(f'{basename}\t{res}\n')

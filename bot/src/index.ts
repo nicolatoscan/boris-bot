@@ -4,6 +4,17 @@ import * as dotenv from 'dotenv'
 dotenv.config();
 
 function getImagesPath(query: string): { results: string[], keys: string[] } {
+    console.log(query);
+    
+    if (query.length === 0) {
+        console.log('All empty');
+        
+        return {
+            results: [ ...imageIndex['empty-words'] ],
+            keys: []
+        }
+    }
+
     const words = query.split(' ')
     const keys = Object.keys(imageIndex).filter(k => words.some(w => k.includes(w)))
     const results = [...new Set(
@@ -49,12 +60,17 @@ bot.on('text', async ctx => {
     }
 });
 
-bot.on('inline_query', (ctx) => {
-    console.log(`Inline search: ${ctx.inlineQuery.query}`);
-    const { results, keys } = getImagesPath(ctx.inlineQuery.query.toLowerCase());
+bot.on('inline_query', async (ctx) => {
+    const q = ctx.inlineQuery.query.toLowerCase()
+    console.log(`Inline search: ${q}`);
     
-
-    ctx.answerInlineQuery(results.slice(0, 50).map((r, i) => ({
+    const { results, keys } = getImagesPath(q.length >= 3 ? q : '');
+    if (q.length < 3) {
+        results.splice(0, 50 * q.length)
+    }
+    
+    
+    await ctx.answerInlineQuery(results.slice(0, 50).map((r, i) => ({
         type: 'photo',
         id: i.toString(),
         thumb_url: `http://nicolatoscan.altervista.org/boris/${r}`,
