@@ -3,24 +3,25 @@ import * as fs from 'fs'
 import * as dotenv from 'dotenv'
 dotenv.config();
 
-const imageIndex = JSON.parse(fs.readFileSync('../index.json', 'utf-8'))
-
-const BOT_TOKEN = process.env.BOT_TOKEN ?? ''
-
-const bot: Telegraf<Context> = new Telegraf(BOT_TOKEN)
-
-bot.command('ping', ctx => ctx.reply('Pong'));
-
-bot.on('text', async ctx => {
-    const words = ctx.message.text.toLowerCase().split(' ')
-
-    // const results = [...new Set(words.map(w => imageIndex[w]).filter(x => x).flat(1))]
+function getImagesPath(query: string): { results: string[], keys: string[] } {
+    const words = query.split(' ')
     const keys = Object.keys(imageIndex).filter(k => words.some(w => k.includes(w)))
     const results = [...new Set(
         keys.map(w => imageIndex[w])
             .filter(x => x)
             .flat(1)
         )]
+    return { results: results, keys: keys };
+}
+
+const imageIndex = JSON.parse(fs.readFileSync('../index.json', 'utf-8'))
+const BOT_TOKEN = process.env.BOT_TOKEN ?? ''
+const bot: Telegraf<Context> = new Telegraf(BOT_TOKEN)
+
+bot.command('ping', ctx => ctx.reply('Pong'));
+
+bot.on('text', async ctx => {
+    const { results, keys } = getImagesPath(ctx.message.text.toLowerCase());
 
     if (results.length === 0) {
         ctx.reply('No image found');
@@ -46,6 +47,20 @@ bot.on('text', async ctx => {
 
     }
 });
+
+bot.on('inline_query', (ctx) => {
+    console.log(ctx.inlineQuery.query);
+    
+    const { results, keys } = getImagesPath(ctx.inlineQuery.query.toLowerCase());
+
+
+    ctx.answerInlineQuery(results.map((r, i) => ({
+        type: 'photo',
+        id: i.toString(),
+        thumb_url: `http://nicolatoscan.altervista.org/boris/${r}`,
+        photo_url: `http://nicolatoscan.altervista.org/boris/${r}`
+    })))
+})
 
 bot.launch()
 console.log(`Bot started`);
