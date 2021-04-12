@@ -27,12 +27,17 @@ bot.on('text', async ctx => {
 
         const chunk = 10;
         for (let i = 0; i < results.length; i += chunk) {
-            await ctx.replyWithMediaGroup(results.slice(i, i + 10).map(p => ({
-                type: 'photo',
-                media: {
-                    source: `../data/jpg/${p}`
-                }
-            })));
+            try {
+                await ctx.replyWithMediaGroup(results.slice(i, i + 10).map(p => ({
+                    type: 'photo',
+                    media: {
+                        source: `../data/jpg/${p}`
+                    }
+                })));
+            } catch {
+                console.log('Error sending photos');
+                return;
+            }
         }
         console.log(`Sent ${results.length} photos `);
         
