@@ -9,6 +9,8 @@ const BOT_TOKEN = process.env.BOT_TOKEN ?? ''
 
 const bot: Telegraf<Context> = new Telegraf(BOT_TOKEN)
 
+bot.command('ping', ctx => ctx.reply('Pong'));
+
 bot.on('text', async ctx => {
     const words = ctx.message.text.toLowerCase().split(' ')
 
