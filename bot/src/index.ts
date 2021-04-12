@@ -10,7 +10,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN ?? ''
 const bot: Telegraf<Context> = new Telegraf(BOT_TOKEN)
 
 bot.on('text', async ctx => {
-    const words = ctx.message.text.split(' ')
+    const words = ctx.message.text.toLowerCase().split(' ')
 
     // const results = [...new Set(words.map(w => imageIndex[w]).filter(x => x).flat(1))]
     const keys = Object.keys(imageIndex).filter(k => words.some(w => k.includes(w)))
